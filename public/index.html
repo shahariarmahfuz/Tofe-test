@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>TOFFEE Sports VIP</title>
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; margin-top: 20px; }
+    video { width: 90%; max-width: 800px; margin: 20px auto; }
+    .status { color: green; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <h1>TOFFEE Sports VIP</h1>
+  <p id="status" class="status">লোড হচ্ছে...</p>
+  <video id="video" controls></video>
+
+  <script>
+    const video = document.getElementById('video');
+    const statusEl = document.getElementById('status');
+    const m3u8Url = '/api/proxy'; // Vercel API রাউট
+
+    if (Hls.isSupported()) {
+      const hls = new Hls();
+      hls.loadSource(m3u8Url);
+      hls.attachMedia(video);
+      
+      hls.on(Hls.Events.MANIFEST_PARSED, () => {
+        statusEl.textContent = "চ্যানেল চালু হয়েছে!";
+        video.play();
+      });
+      
+      hls.on(Hls.Events.ERROR, (event, data) => {
+        statusEl.textContent = "ত্রুটি: " + data.type;
+        console.error(data);
+      });
+    } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+      // Safari (নেটিভ HLS সাপোর্ট)
+      video.src = m3u8Url;
+      video.addEventListener('loadedmetadata', () => {
+        statusEl.textContent = "চ্যানেল চালু হয়েছে!";
+        video.play();
+      });
+    } else {
+      statusEl.textContent = "আপনার ব্রাউজার HLS সাপোর্ট করে না।";
+    }
+  </script>
+</body>
+</html>
